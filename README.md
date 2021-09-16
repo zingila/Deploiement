@@ -32,4 +32,4 @@ db.createUser(
 )
 
 Ensuite il reste plus qu'à lancer notre fichier app qui contient indirectement les liaisons entre flask et docker:
-python3 app.py
+$ python3 app.py
