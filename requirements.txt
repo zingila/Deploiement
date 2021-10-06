@@ -1,2 +1,7 @@
-flask==1.1.1
-pymongo
+fastapi
+requests
+pandas
+pydantic
+scikit-learn
+starlette
+uvicorn
