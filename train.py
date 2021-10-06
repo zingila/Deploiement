@@ -1,87 +1,41 @@
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+#from sklearn.ensemble import RandomForestClassifier
+from sklearn import metrics, preprocessing, model_selection, svm
+
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
 import pickle
 
-from nltk.corpus import stopwords
-from nltk.tokenize import NLTKWordTokenizer
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.tree import DecisionTreeClassifier
-
-df = pd.read_csv('DisneylandReviews.csv', encoding='cp1252')
-df.head()
+df = pd.read_csv('churn.csv')
+df.info()
 
 df.info()
-df['Rating'].unique()
 
 #Préparation des données
-df = df.drop(['Review_ID', 'Year_Month', 'Reviewer_Location'], axis=1)
+df.TotalCharges = df.TotalCharges.replace([' '], [0])
+df["TotalCharges"] = pd.to_numeric(df["TotalCharges"])
+df.gender = df.gender.replace(['Male', 'Female'], [1, 0])
+df = df.replace(['No internet service','No phone service'], ['No','No'])
+df[['Partner','Dependents','PhoneService', 'MultipleLines', 'OnlineSecurity', 'OnlineBackup', 'DeviceProtection', 'TechSupport', 'StreamingTV', 'StreamingMovies', 'PaperlessBilling', 'Churn']>
+df = df.join(pd.get_dummies(df['Contract'], prefix='Contract'))
+df = df.join(pd.get_dummies(df['PaymentMethod'], prefix='PaymentMethod'))
+df = df.join(pd.get_dummies(df['InternetService'], prefix='InternetService'))
 
-def preprocess_text(text):
-    stop_words = set(stopwords.words('english'))
-    stop_words.update(["'ve", "", "'ll", "'s", ".", ",", "?", "!", "(", ")", "..", "'m", "n", "u"])
-    tokenizer = NLTKWordTokenizer()
-    
-    text = text.lower()
-    
-    tokens = tokenizer.tokenize(text)
-    tokens = [t for t in tokens if t not in stop_words]
-    
-    return ' '.join(tokens)
+df = df.drop(['customerID','tenure', 'Contract', 'PaymentMethod', 'InternetService'], axis=1)
 
-df['Review_Text'] = df['Review_Text'].apply(preprocess_text)
-df.head()
-df['Review_Text'][1]
+data = df.drop('Churn', axis = 1)
+target = df['Churn']
+X_train, X_test, y_train, y_test = train_test_split(data,target,test_size=0.2) # 80% training and 20% test
 
-#Premier modele
-#Le premier modèle consiste à considérer toutes les branches ensemble
-df1 = df.drop(['Branch'], axis=1)
-df1.head()
+dt = DecisionTreeClassifier()
+dt.fit(X_train, y_train)
 
-features = df['Review_Text']
-target = df['Rating']
+y_pred = dt.predict(X_test)
 
-X_train, X_test, y_train, y_test = train_test_split(features, target)
 
-count_vectorizer_unique = CountVectorizer(max_features=2000)
-
-X_train_cv = count_vectorizer_unique.fit_transform(X_train)
-X_test_cv = count_vectorizer_unique.transform(X_test)
-
-model_unique = RandomForestClassifier(max_depth=3, n_estimators=100)
-#model_unique = LogisticRegression()
-#model_unique = DecisionTreeClassifier(max_depth=8)
-
-model_unique.fit(X_train_cv, y_train)
-
-model_unique.score(X_test_cv, y_test)
-print("\n")
-#Deuxieme modele
-#Dans ce modele les branches sont séparées en 3
-df['Branch'].unique()
-
-count_vectorizers = {}
-models = {}
-
-for branch in df['Branch'].unique():
-    count_vectorizer = CountVectorizer(max_features=2000)
-#     model = LogisticRegression()
-    model = RandomForestClassifier(n_estimators=20, max_depth=5)
-    
-    df_temp = df[df['Branch'] == branch]
-    
-    X_train, X_test, y_train, y_test = train_test_split(df_temp['Review_Text'], df_temp['Rating'])
-    
-    X_train_cv = count_vectorizer.fit_transform(X_train)
-    X_test_cv = count_vectorizer.transform(X_test)
-    
-    model.fit(X_train_cv, y_train)
-    print(branch, ':', model.score(X_test_cv, y_test))
-    
-    count_vectorizers[branch] = count_vectorizer
-    models[branch] = model
-
+#Enregistrement du modele decisiontreeclassifier
 with open("./api/data/model.pkl", "wb") as f:
-    pickle.dump([model_unique,models], f)
+    pickle.dump([y_test,y_pred], f)
