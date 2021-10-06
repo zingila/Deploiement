@@ -19,7 +19,7 @@ df.TotalCharges = df.TotalCharges.replace([' '], [0])
 df["TotalCharges"] = pd.to_numeric(df["TotalCharges"])
 df.gender = df.gender.replace(['Male', 'Female'], [1, 0])
 df = df.replace(['No internet service','No phone service'], ['No','No'])
-df[['Partner','Dependents','PhoneService', 'MultipleLines', 'OnlineSecurity', 'OnlineBackup', 'DeviceProtection', 'TechSupport', 'StreamingTV', 'StreamingMovies', 'PaperlessBilling', 'Churn']>
+df[['Partner','Dependents','PhoneService', 'MultipleLines', 'OnlineSecurity', 'OnlineBackup', 'DeviceProtection', 'TechSupport', 'StreamingTV', 'StreamingMovies', 'PaperlessBilling', 'Churn']] = df[['Partner','Dependents','PhoneService', 'MultipleLines', 'OnlineSecurity', 'OnlineBackup', 'DeviceProtection', 'TechSupport', 'StreamingTV', 'StreamingMovies', 'PaperlessBilling', 'Churn']].replace(['Yes','No'], [0,1])
 df = df.join(pd.get_dummies(df['Contract'], prefix='Contract'))
 df = df.join(pd.get_dummies(df['PaymentMethod'], prefix='PaymentMethod'))
 df = df.join(pd.get_dummies(df['InternetService'], prefix='InternetService'))
