@@ -1,35 +1,27 @@
 # Deploiement
 
-Projet DE #3 - Base de données & API de données
+Projet DE #3 - API de données & Modele prédiction
 Prérequis:
-  - Mongodb
   - Python3
-  - Flask
+  - Fastapi
 
-Commande d'installation de la base de donnée mongodb:
-$ sudo apt update
-$ python -m pip install pymongo
+Commenncer par installer les dépendances qui se trouvent à la racine:
+pip install -r requirements.txt
 
-$ sudo apt install mongodb
-$ sudo systemctl status mongodb
-$ sudo service mongodb start
+Puis entraîner le modele de prédiction sur le fichier csv. Le script enregistre dans le dossier /api/data le résultat du modele
+(RandomForestClassifier).
 
-Commande pour peupler la base de donnée:
-$ mongoimport --type csv -d projet -c transfert --headerline --drop top250-00-19.csv
+# API
 
-Puis vérifier que sur mongo la base de donnée est prête:
-$ mongo
-> use projet
-> db.transfert.find()
+Après avoir entraîner le modele, vous pouvez retrouvez l'API dans le dossier api ainsi que c'est fichiers attribué (Dockerfile, ...)
+lancer l'api avec la commande: uvicorn main:api --reload
 
-On en profite pour créer un utilisateur depuis mongo:
-db.createUser(
-  {
-    user: "myUserAdmin",
-    pwd:  "abc123",
-    roles: [ { role: "userAdmin", db: "projet" }]
-  }
-)
+Vous retrouverez l'api accessible à l'adresse localhost:8000/docs
 
-Ensuite il reste plus qu'à lancer notre fichier app qui contient indirectement les liaisons entre flask et docker:
-$ python3 app.py
+
+# Tests
+
+Les tests permettent de traiter uniquement l'état d'authentification, si un utilisateur est authentifié.
+Placez vous dans le dossier tests afin d'accéder aux fichier tests attribués.
+
+Vous trouverez aussi le fichier docker-compose.yml, il s'agit du fichier qui va permettre de lancer tous nos services ensemble.
