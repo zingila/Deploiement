@@ -1,7 +1,11 @@
 import os
 import requests
+import time
 
-api_address = "my_container_fastapi"
+#Refresh the page
+time.sleep(3)
+
+api_address = "fastapi"
 api_port = 8000
 
 r = requests.get(url="http://{address}:{port}/prediction".format(address=api_address, port=api_port), params= {

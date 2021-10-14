@@ -1,10 +1,13 @@
 from pydantic import BaseModel
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, status
 from typing import Optional
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.encoders import jsonable_encoder
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from starlette.responses import RedirectResponse
+from models import Features
+from data_preparation import prepare_data
+
 import pickle
 import csv 
 import json
@@ -50,10 +53,11 @@ def redirect_to_docs():
     return RedirectResponse(url="/docs")
 
 @api.post("/prediction")
-def make_prediction(username: str = Depends(check_credentials)):
+def make_prediction(data: Features, username: str = Depends(check_credentials)):
 
-    for i in range(len(model)):
-                print(model[i])
+    df = prepare_data(data)
+    proba = round(model.predict_proba(df)[0][1], 4)
+    prediction = int(model.predict(df)[0])
 
-    return {"Model": model}
+    return {"Prediction": prediction, "proba": proba}
 

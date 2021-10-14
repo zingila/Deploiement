@@ -1,20 +1,22 @@
 version: '3.9'
 services:
+  fastapi:
+    image: bzingila/api:latest
+    build: ../api
+    container_name: my_container_fastapi
+    ports:
+      - "8000:8000"
+    networks:
+      - my_network
   my_debian:
-    image: bzingila/authentification:latest
+    image: bzingila/authentification:service
+    build: .
     container_name: my_container_authentification
     depends_on:
       - fastapi
     networks:
       - my_network
     environment:
-      - LOG=1
-  fastapi:
-    image: bzingila/api:latest
-    container_name: my_container_fastapi
-    ports:
-      - "8000:8000"
-    networks:
-      - my_network
+      - API_URL=http://fastapi:8000
 networks:
   my_network:
